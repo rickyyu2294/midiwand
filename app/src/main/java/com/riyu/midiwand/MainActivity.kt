@@ -16,18 +16,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.riyu.midiwand.domain.usecase.PitchUseCase
 import com.riyu.midiwand.ui.theme.MIDIWandTheme
 
 private const val TAG = "MainActivity"
 
 class MainActivity : ComponentActivity() {
+    private lateinit var pitchUseCase: PitchUseCase
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate Called")
+        pitchUseCase = PitchUseCase(applicationContext)
 
         setContent {
             MIDIWandTheme {
-                MidiWandApp()
+                MidiWandApp(pitchUseCase = pitchUseCase)
             }
         }
     }
@@ -60,10 +62,20 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         Log.d(TAG, "onDestroy Called")
     }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun GreetingPreview() {
+        MIDIWandTheme {
+            MidiWandApp(pitchUseCase)
+        }
+    }
+
 }
 
 @Composable
 fun MidiWandApp(
+    pitchUseCase: PitchUseCase,
     modifier: Modifier = Modifier
 ) {
 
@@ -86,11 +98,4 @@ fun MidiWandApp(
 
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MIDIWandTheme {
-        MidiWandApp()
-    }
-}
 
