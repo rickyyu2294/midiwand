@@ -18,23 +18,21 @@ class PitchUseCase(private val context: Context) {
     private val magnetometer: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
     private val rotationMatrix = FloatArray(9)
-    private val orientationValues = FloatArray(3)
+    private val orientationValues = FloatArray(6)
 
     fun observePitch(): Flow<Float> = callbackFlow {
         val sensorEventListener = object : SensorEventListener {
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-                // Not needed for this example
-            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
             override fun onSensorChanged(event: SensorEvent) {
                 when (event.sensor.type) {
                     Sensor.TYPE_ACCELEROMETER -> System.arraycopy(
                         event.values, 0,
-                        orientationValues, 0, orientationValues.size
+                        orientationValues, 0, 3
                     )
                     Sensor.TYPE_MAGNETIC_FIELD -> System.arraycopy(
                         event.values, 0,
-                        orientationValues, 3, orientationValues.size - 3
+                        orientationValues, 3, 3
                     )
                 }
 
@@ -66,6 +64,10 @@ class PitchUseCase(private val context: Context) {
                 sensorManager.unregisterListener(sensorEventListener)
             }
         }
+    }
+
+    fun getCurrentPitch(): Float {
+        return calculatePitch()
     }
 
     private fun calculatePitch(): Float {

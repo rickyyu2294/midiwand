@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.riyu.midiwand.domain.usecase.PitchUseCase
 import com.riyu.midiwand.ui.theme.MIDIWandTheme
+import kotlin.math.roundToInt
 
 private const val TAG = "MainActivity"
 
@@ -94,8 +98,29 @@ fun MidiWandApp(
             onValueChange = { sliderVal = it},
             modifier = modifier.padding(horizontal = 24.dp)
         )
+
+        PitchDisplay(pitchUseCase)
     }
 
+}
+
+@Composable
+fun PitchDisplay(pitchUseCase: PitchUseCase) {
+    var pitch by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(pitchUseCase) {
+        pitchUseCase.observePitch().collect { newPitch ->
+            pitch = newPitch
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "Pitch: ${pitch.roundToInt()} degrees")
+    }
 }
 
 
