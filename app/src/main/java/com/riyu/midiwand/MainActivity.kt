@@ -7,8 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,10 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.riyu.midiwand.domain.usecase.PitchUseCase
 import com.riyu.midiwand.ui.theme.MIDIWandTheme
-import kotlin.math.roundToInt
 
 private const val TAG = "MainActivity"
 
@@ -29,8 +25,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var pitchUseCase: PitchUseCase
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pitchUseCase = PitchUseCase(applicationContext)
 
+        pitchUseCase = PitchUseCase(applicationContext)
         setContent {
             MIDIWandTheme {
                 MidiWandApp(pitchUseCase = pitchUseCase)
@@ -89,16 +85,6 @@ fun MidiWandApp(
 
     Column(
     ) {
-        Text(
-            text = "Hello",
-            modifier = modifier
-        )
-        Slider(
-            value = sliderVal,
-            onValueChange = { sliderVal = it},
-            modifier = modifier.padding(horizontal = 24.dp)
-        )
-
         PitchDisplay(pitchUseCase)
     }
 
@@ -119,7 +105,11 @@ fun PitchDisplay(pitchUseCase: PitchUseCase) {
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Pitch: ${pitch.roundToInt()} degrees")
+        val degrees = Math.toDegrees(-pitch.toDouble())
+        val displayValue = if (degrees > 0) {
+            ((degrees / 90) * 127).toInt()
+        } else 0
+        Text(text = "Value $displayValue")
     }
 }
 

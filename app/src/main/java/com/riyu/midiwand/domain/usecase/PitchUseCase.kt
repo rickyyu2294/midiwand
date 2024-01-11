@@ -8,7 +8,6 @@ import android.hardware.SensorManager
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlin.math.asin
 
 class PitchUseCase(private val context: Context) {
 
@@ -18,7 +17,9 @@ class PitchUseCase(private val context: Context) {
     private val magnetometer: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
     private val rotationMatrix = FloatArray(9)
-    private val orientationValues = FloatArray(6)
+    private val accelerometerValues = FloatArray(3)
+    private val magnetometerValues = FloatArray(3)
+    private val orientationAngles = FloatArray(3)
 
     fun observePitch(): Flow<Float> = callbackFlow {
         val sensorEventListener = object : SensorEventListener {
@@ -28,22 +29,24 @@ class PitchUseCase(private val context: Context) {
                 when (event.sensor.type) {
                     Sensor.TYPE_ACCELEROMETER -> System.arraycopy(
                         event.values, 0,
-                        orientationValues, 0, 3
+                        accelerometerValues, 0, 3
                     )
                     Sensor.TYPE_MAGNETIC_FIELD -> System.arraycopy(
                         event.values, 0,
-                        orientationValues, 3, 3
+                        magnetometerValues, 0, 3
                     )
                 }
 
                 SensorManager.getRotationMatrix(
                     rotationMatrix,
                     null,
-                    orientationValues,
-                    orientationValues.copyOfRange(3, 6)
+                    accelerometerValues,
+                    magnetometerValues
                 )
 
-                val pitch = calculatePitch()
+                SensorManager.getOrientation(rotationMatrix, orientationAngles)
+
+                val pitch = orientationAngles[1]
                 trySend(pitch)
             }
         }
@@ -64,18 +67,5 @@ class PitchUseCase(private val context: Context) {
                 sensorManager.unregisterListener(sensorEventListener)
             }
         }
-    }
-
-    fun getCurrentPitch(): Float {
-        return calculatePitch()
-    }
-
-    private fun calculatePitch(): Float {
-        // Calculate pitch using rotationMatrix and orientationValues
-        // You can customize this calculation based on your requirements.
-        // For example, you might want to use Math.atan2 or other trigonometric functions.
-        // Ensure to return the pitch value in degrees.
-        // Example:
-        return Math.toDegrees(asin(rotationMatrix[1].toDouble())).toFloat()
     }
 }
